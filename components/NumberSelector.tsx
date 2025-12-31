@@ -1,19 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import Skeleton from './Skeleton';
 
-interface NumberSelectorProps {
-  takenNumbers: Set<number>;
-  selectedNumber: string;
-  onSelect: (num: string) => void;
-  loading?: boolean;
-}
-
-const NumberSelector: React.FC<NumberSelectorProps> = ({ takenNumbers, selectedNumber, onSelect, loading = false }) => {
-  const [rangeIndex, setRangeIndex] = useState(0); // 0 = 0-99, 1 = 100-199...
-  const [searchTerm, setSearchTerm] = useState('');
+const NumberSelector = ({ takenNumbers, selectedNumber, onSelect, loading = false }) => {
+  const [rangeIndex, setRangeIndex] = React.useState(0); // 0 = 0-99, 1 = 100-199...
+  const [searchTerm, setSearchTerm] = React.useState('');
 
   // Ranges setup
-  const ranges = useMemo(() => {
+  const ranges = React.useMemo(() => {
     const r = [];
     for (let i = 0; i < 10; i++) {
       r.push({
@@ -28,7 +21,7 @@ const NumberSelector: React.FC<NumberSelectorProps> = ({ takenNumbers, selectedN
   }, []);
 
   // Filter logic
-  const visibleNumbers = useMemo(() => {
+  const visibleNumbers = React.useMemo(() => {
     if (searchTerm.trim()) {
       const term = searchTerm.replace(/\D/g, '');
       const results = [];

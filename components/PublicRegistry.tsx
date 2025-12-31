@@ -1,20 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { fetchApprovedRegistry, RegistryItem } from '../services/sheetService.ts';
-import Skeleton from './Skeleton.tsx';
-
-interface PublicRegistryProps {
-  refreshTrigger?: number;
-}
+import React from 'react';
+import Skeleton from './Skeleton';
+import { fetchApprovedRegistry } from '../services/sheetService';
 
 const ITEMS_PER_PAGE = 12;
 
-const PublicRegistry: React.FC<PublicRegistryProps> = ({ refreshTrigger = 0 }) => {
-    const [registry, setRegistry] = useState<RegistryItem[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
+const PublicRegistry = ({ refreshTrigger = 0 }) => {
+    const [registry, setRegistry] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
+    const [filter, setFilter] = React.useState('');
+    const [currentPage, setCurrentPage] = React.useState(1);
 
-    useEffect(() => {
+    React.useEffect(() => {
         const load = async () => {
             setLoading(true);
             const data = await fetchApprovedRegistry();
@@ -32,7 +28,7 @@ const PublicRegistry: React.FC<PublicRegistryProps> = ({ refreshTrigger = 0 }) =
     const totalPages = Math.ceil(filteredRegistry.length / ITEMS_PER_PAGE);
     
     // Reset page if filter changes
-    useEffect(() => {
+    React.useEffect(() => {
         setCurrentPage(1);
     }, [filter]);
 

@@ -1,31 +1,24 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { GeneratedNumbers } from "../types.ts";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // Simulation of a Database using LocalStorage
 const DB_KEY = 'rcc_mega_virada_db_2025';
 
-interface RegisteredTicket {
-  nickname: string;
-  numbers: number[];
-  timestamp: number;
-}
-
-const getRegisteredTickets = (): RegisteredTicket[] => {
+const getRegisteredTickets = () => {
   if (typeof window === 'undefined') return [];
   const stored = localStorage.getItem(DB_KEY);
   return stored ? JSON.parse(stored) : [];
 };
 
-const getAllUsedNumbers = (): Set<number> => {
+const getAllUsedNumbers = () => {
   const tickets = getRegisteredTickets();
-  const used = new Set<number>();
+  const used = new Set();
   tickets.forEach(t => t.numbers.forEach(n => used.add(n)));
   return used;
 };
 
-const saveTicket = (nickname: string, numbers: number[]) => {
+const saveTicket = (nickname, numbers) => {
   const tickets = getRegisteredTickets();
   tickets.push({
     nickname,
@@ -35,25 +28,18 @@ const saveTicket = (nickname: string, numbers: number[]) => {
   localStorage.setItem(DB_KEY, JSON.stringify(tickets));
 };
 
-const generateUniqueRandom = (exclude: Set<number>): number => {
+const generateUniqueRandom = (exclude) => {
   let num = Math.floor(Math.random() * 1000); // 0 to 999
-  // Simple collision resolution: Linear probe or random retry
-  // Since 1000 is small, we can just find a free one easily
   while (exclude.has(num)) {
     num = Math.floor(Math.random() * 1000);
-    // Safety break for full database (unlikely in demo)
     if (exclude.size >= 1000) return -1; 
   }
   return num;
 };
 
-export const generateLuckyNumbers = async (wish: string, nickname: string): Promise<GeneratedNumbers> => {
+export const generateLuckyNumbers = async (wish, nickname) => {
   try {
-    // 1. Get currently used numbers from "Database"
     const usedNumbers = getAllUsedNumbers();
-
-    // 2. Check if this user already played (Optional rule, usually strictly 1 ticket per person)
-    // For this demo, we allow re-rolls but warn in console.
     
     const prompt = `
       O usuário é um policial da RCC participando da Mega da Virada.
@@ -106,16 +92,11 @@ export const generateLuckyNumbers = async (wish: string, nickname: string): Prom
         ];
     }
 
-    // 3. ENFORCE UNIQUENESS (The "Logic Check")
-    const finalNumbers: number[] = [];
+    const finalNumbers = [];
     
     for (let num of candidates) {
-        // Force number to be integer 0-999
         let cleanNum = Math.abs(Math.floor(Number(num))) % 1000;
-
-        // Check against Global DB (usedNumbers) AND Local Duplicates (finalNumbers)
         if (usedNumbers.has(cleanNum) || finalNumbers.includes(cleanNum)) {
-            // Collision detected! Find a replacement.
             const replacement = generateUniqueRandom(new Set([...usedNumbers, ...finalNumbers]));
             if (replacement !== -1) {
                 finalNumbers.push(replacement);
@@ -125,16 +106,12 @@ export const generateLuckyNumbers = async (wish: string, nickname: string): Prom
         }
     }
 
-    // Ensure we have exactly 3
     while (finalNumbers.length < 3) {
         const replacement = generateUniqueRandom(new Set([...usedNumbers, ...finalNumbers]));
         finalNumbers.push(replacement);
     }
 
-    // Sort for display
     finalNumbers.sort((a, b) => a - b);
-
-    // 4. Save to "Database"
     saveTicket(nickname, finalNumbers);
 
     return {
@@ -146,7 +123,6 @@ export const generateLuckyNumbers = async (wish: string, nickname: string): Prom
   } catch (error) {
     console.error("Erro ao gerar números:", error);
     
-    // Fallback in case of API error, still ensuring uniqueness locally
     const usedNumbers = getAllUsedNumbers();
     const fallbackNumbers = [
         generateUniqueRandom(usedNumbers),

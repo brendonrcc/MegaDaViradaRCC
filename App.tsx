@@ -1,22 +1,22 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import BackgroundEffects from './components/BackgroundEffects.tsx';
-import NebulaBackground from './components/NebulaBackground.tsx';
-import GridBackground from './components/GridBackground.tsx';
-import Countdown from './components/Countdown.tsx';
-import TicketGenerator from './components/TicketGenerator.tsx';
-import PublicRegistry from './components/PublicRegistry.tsx';
-import LoadingScreen from './components/LoadingScreen.tsx';
+import React from 'react';
+import BackgroundEffects from './components/BackgroundEffects';
+import Countdown from './components/Countdown';
+import NebulaBackground from './components/NebulaBackground';
+import TicketGenerator from './components/TicketGenerator';
+import GridBackground from './components/GridBackground';
+import PublicRegistry from './components/PublicRegistry';
+import LoadingScreen from './components/LoadingScreen';
 
 // --- Global Constants ---
 const RCC_LOGO_URL = "https://i.imgur.com/YhONB12.jpeg";
 
 // --- Custom Cursor Component ---
 const CustomCursor = () => {
-    const dotRef = useRef<HTMLDivElement>(null);
-    const outlineRef = useRef<HTMLDivElement>(null);
+    const dotRef = React.useRef(null);
+    const outlineRef = React.useRef(null);
 
-    useEffect(() => {
-        const moveCursor = (e: MouseEvent) => {
+    React.useEffect(() => {
+        const moveCursor = (e) => {
             if (dotRef.current && outlineRef.current) {
                 dotRef.current.style.left = `${e.clientX}px`;
                 dotRef.current.style.top = `${e.clientY}px`;
@@ -36,23 +36,23 @@ const CustomCursor = () => {
     if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) return null;
 
     return (
-        <>
+        <React.Fragment>
             <div ref={dotRef} className="cursor-dot hidden md:block" />
             <div ref={outlineRef} className="cursor-outline hidden md:block" />
-        </>
+        </React.Fragment>
     );
 };
 
-const App: React.FC = () => {
-  const [globalRefreshTrigger, setGlobalRefreshTrigger] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isScrolled, setIsScrolled] = useState(false);
+const App = () => {
+  const [globalRefreshTrigger, setGlobalRefreshTrigger] = React.useState(0);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isScrolled, setIsScrolled] = React.useState(false);
   
   // Hero Interaction State
-  const heroRef = useRef<HTMLDivElement>(null);
-  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const heroRef = React.useRef(null);
+  const [mousePos, setMousePos] = React.useState({ x: 50, y: 50 });
 
-  useEffect(() => {
+  React.useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
@@ -60,11 +60,11 @@ const App: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleGlobalRefresh = useCallback(() => {
+  const handleGlobalRefresh = React.useCallback(() => {
     setGlobalRefreshTrigger(prev => prev + 1);
   }, []);
 
-  const handleHeroMouseMove = (e: React.MouseEvent) => {
+  const handleHeroMouseMove = (e) => {
     if (!heroRef.current) return;
     const rect = heroRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -72,7 +72,7 @@ const App: React.FC = () => {
     setMousePos({ x, y });
   };
 
-  const scrollToSection = (id: string) => {
+  const scrollToSection = (id) => {
     const element = document.getElementById(id);
     if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
@@ -80,7 +80,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <>
+    <React.Fragment>
       <LoadingScreen onComplete={() => setIsLoading(false)} />
       <CustomCursor />
       
@@ -363,7 +363,7 @@ const App: React.FC = () => {
           </p>
         </footer>
       </div>
-    </>
+    </React.Fragment>
   );
 };
 

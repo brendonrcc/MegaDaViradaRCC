@@ -1,15 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
-interface LoadingScreenProps {
-  onComplete: () => void;
-}
+const LoadingScreen = ({ onComplete }) => {
+  const [progress, setProgress] = React.useState(0);
+  const [isFading, setIsFading] = React.useState(false);
+  const [visible, setVisible] = React.useState(true);
 
-const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
-  const [progress, setProgress] = useState(0);
-  const [isFading, setIsFading] = useState(false);
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
+  React.useEffect(() => {
     // Animação de progresso suave baseada em tempo (não linear para parecer mais natural)
     const duration = 2500; 
     const startTime = Date.now();

@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { generateVerificationCode, verifyHabboMission } from '../services/habboService.ts';
-import { submitMissionToSheet, fetchTakenNumbers, fetchUserHistory, UserHistoryItem } from '../services/sheetService.ts';
-import NumberSelector from './NumberSelector.tsx';
-import Skeleton from './Skeleton.tsx';
+import React from 'react';
+import Skeleton from './Skeleton';
+import NumberSelector from './NumberSelector';
+import { generateVerificationCode, verifyHabboMission } from '../services/habboService';
+import { submitMissionToSheet, fetchTakenNumbers, fetchUserHistory } from '../services/sheetService';
 
 // --- SVG ICONS ---
 const Icons = {
@@ -20,52 +20,46 @@ const Icons = {
 
 const RCC_LOGO_URL = "https://i.imgur.com/YhONB12.jpeg";
 
-type Stage = 'LOGIN' | 'VERIFICATION' | 'DASHBOARD';
-
-interface MissionState {
-  id: number;
-  title: string;
-  desc: string;
-  status: 'LOCKED' | 'PENDING' | 'SUBMITTING' | 'COMPLETED' | 'REJECTED';
-  statusLabel?: string;
-  chosenNumber: string;
-  proofLink: string;
-}
-
-interface TicketGeneratorProps {
-  onGlobalRefresh?: () => void;
-}
-
-const MISSION_MAP: Record<number, string> = {
+const MISSION_MAP = {
     1: "1 Hora em Função",
     2: "Rondas Ostensivas",
     3: "Recrutamento"
 };
 
-const normalizeText = (text: string) => {
+const normalizeText = (text) => {
     return (text || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
 };
 
-const TicketGenerator: React.FC<TicketGeneratorProps> = ({ onGlobalRefresh }) => {
-  const [stage, setStage] = useState<Stage>('LOGIN');
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [nickname, setNickname] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [verifying, setVerifying] = useState(false);
-  const [verifyError, setVerifyError] = useState<string | null>(null);
-  const [takenNumbers, setTakenNumbers] = useState<Set<number>>(new Set());
-  const [userHistory, setUserHistory] = useState<UserHistoryItem[]>([]);
-  const [loadingData, setLoadingData] = useState(false);
-  const [refreshStatus, setRefreshStatus] = useState<'idle' | 'success'>('idle');
+interface Mission {
+  id: number;
+  title: string;
+  desc: string;
+  status: string;
+  statusLabel?: string;
+  chosenNumber: string;
+  proofLink: string;
+}
+
+const TicketGenerator = ({ onGlobalRefresh }) => {
+  const [stage, setStage] = React.useState('LOGIN');
+  const [isTransitioning, setIsTransitioning] = React.useState(false);
+  const [nickname, setNickname] = React.useState('');
+  const [verificationCode, setVerificationCode] = React.useState('');
+  const [verifying, setVerifying] = React.useState(false);
+  const [verifyError, setVerifyError] = React.useState(null);
+  const [takenNumbers, setTakenNumbers] = React.useState(new Set());
+  const [userHistory, setUserHistory] = React.useState([]);
+  const [loadingData, setLoadingData] = React.useState(false);
+  const [refreshStatus, setRefreshStatus] = React.useState('idle');
   
-  const [missions, setMissions] = useState<MissionState[]>([
+  const [missions, setMissions] = React.useState<Mission[]>([
     { id: 1, title: MISSION_MAP[1], desc: '1h em Função', status: 'PENDING', chosenNumber: '', proofLink: '' },
     { id: 2, title: MISSION_MAP[2], desc: '03 Rondas de Recrutamento ou Divulgação', status: 'PENDING', chosenNumber: '', proofLink: '' },
     { id: 3, title: MISSION_MAP[3], desc: 'Recrutar 01 Civil', status: 'PENDING', chosenNumber: '', proofLink: '' },
   ]);
-  const [activeMissionId, setActiveMissionId] = useState<number | null>(null);
+  const [activeMissionId, setActiveMissionId] = React.useState(null);
 
-  const changeStage = (newStage: Stage) => {
+  const changeStage = (newStage) => {
     setIsTransitioning(true);
     setTimeout(() => {
         setStage(newStage);
@@ -73,7 +67,7 @@ const TicketGenerator: React.FC<TicketGeneratorProps> = ({ onGlobalRefresh }) =>
     }, 600); 
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     const storedSession = localStorage.getItem('rcc_mega_session');
     if (storedSession) {
         try {
@@ -88,11 +82,11 @@ const TicketGenerator: React.FC<TicketGeneratorProps> = ({ onGlobalRefresh }) =>
     }
   }, []);
 
-  const saveSession = (nick: string) => {
+  const saveSession = (nick) => {
       localStorage.setItem('rcc_mega_session', JSON.stringify({ nickname: nick }));
   };
 
-  const refreshData = useCallback(() => {
+  const refreshData = React.useCallback(() => {
     if (!nickname) return;
     if (onGlobalRefresh) onGlobalRefresh();
     setLoadingData(true);
@@ -123,7 +117,7 @@ const TicketGenerator: React.FC<TicketGeneratorProps> = ({ onGlobalRefresh }) =>
     });
   }, [nickname, onGlobalRefresh]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (stage === 'DASHBOARD' && nickname) refreshData();
   }, [stage, nickname, refreshData]);
 
@@ -165,7 +159,7 @@ const TicketGenerator: React.FC<TicketGeneratorProps> = ({ onGlobalRefresh }) =>
       setMissions(missions.map(m => ({ ...m, status: 'PENDING', chosenNumber: '', proofLink: '' })));
   };
 
-  const handleSubmitMission = async (id: number) => {
+  const handleSubmitMission = async (id) => {
     const mission = missions.find(m => m.id === id);
     if (!mission) return;
 
@@ -187,7 +181,7 @@ const TicketGenerator: React.FC<TicketGeneratorProps> = ({ onGlobalRefresh }) =>
     }
   };
 
-  const updateMissionField = (id: number, field: 'chosenNumber' | 'proofLink', value: string) => {
+  const updateMissionField = (id, field, value) => {
     setMissions(prev => prev.map(m => m.id !== id ? m : { ...m, [field]: value }));
   };
 
@@ -511,13 +505,11 @@ const TicketGenerator: React.FC<TicketGeneratorProps> = ({ onGlobalRefresh }) =>
   };
 
   return (
-    <div className="w-full relative z-10 flex flex-col justify-center">
-        <div className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${isTransitioning ? 'opacity-0 blur-lg scale-95 translate-y-12' : 'opacity-100 blur-0 scale-100 translate-y-0'}`}>
-            {stage === 'LOGIN' && renderLogin()}
-            {stage === 'VERIFICATION' && renderVerify()}
-            {stage === 'DASHBOARD' && renderDashboard()}
-        </div>
-    </div>
+    <>
+      {stage === 'LOGIN' && renderLogin()}
+      {stage === 'VERIFICATION' && renderVerify()}
+      {stage === 'DASHBOARD' && renderDashboard()}
+    </>
   );
 };
 

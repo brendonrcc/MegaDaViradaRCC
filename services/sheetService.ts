@@ -8,34 +8,14 @@ const BASE_SHEET_URL = "https://rccapi.brendon-goncalves.workers.dev/";
 // GID_HISTORY é a única fonte da verdade agora (1872953189)
 const GID_HISTORY = "1872953189"; 
 
-export interface MissionSubmission {
-  nickname: string;
-  missionId: number;
-  chosenNumber: number;
-  proofLink: string;
-}
-
-export interface UserHistoryItem {
-  timestamp?: string;
-  missionId: string;
-  chosenNumber: string;
-  proofLink: string;
-  status: string; 
-}
-
-export interface RegistryItem {
-    number: number;
-    nickname: string;
-}
-
 // Limpa células que podem vir com aspas ou espaços extras do formato TSV/CSV
-const cleanData = (data: string) => {
+const cleanData = (data) => {
     if (!data) return "";
     return data.replace(/^["']|["']$/g, '').trim();
 };
 
 // Função auxiliar para analisar TSV de forma robusta
-const parseTSV = (text: string): string[][] => {
+const parseTSV = (text) => {
   const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   const lines = normalized.split('\n');
   return lines.map(line => line.split('\t').map(cleanData));
@@ -47,7 +27,7 @@ const getCacheBuster = () => `cb=${Math.floor(Date.now() / 1000)}`;
 // ============================================================================
 // 1. BUSCAR REGISTRO PÚBLICO (QUEM PEGOU O QUÊ)
 // ============================================================================
-export const fetchApprovedRegistry = async (): Promise<RegistryItem[]> => {
+export const fetchApprovedRegistry = async () => {
     try {
         // Worker espera: ?gid=...
         const url = `${BASE_SHEET_URL}?gid=${GID_HISTORY}&${getCacheBuster()}`;
@@ -59,7 +39,7 @@ export const fetchApprovedRegistry = async (): Promise<RegistryItem[]> => {
         if (text.trim().startsWith('<')) return []; 
 
         const rows = parseTSV(text);
-        const registry: RegistryItem[] = [];
+        const registry = [];
 
         for (let i = 1; i < rows.length; i++) {
             const row = rows[i];
@@ -89,8 +69,8 @@ export const fetchApprovedRegistry = async (): Promise<RegistryItem[]> => {
 // 2. BUSCAR NÚMEROS OCUPADOS (GRID GLOBAL)
 // Fonte única: Histórico (1872953189)
 // ============================================================================
-export const fetchTakenNumbers = async (): Promise<Set<number>> => {
-  const blockedNumbers = new Set<number>();
+export const fetchTakenNumbers = async () => {
+  const blockedNumbers = new Set();
 
   try {
     // Worker espera: ?gid=...
@@ -129,7 +109,7 @@ export const fetchTakenNumbers = async (): Promise<Set<number>> => {
 // ============================================================================
 // 3. BUSCAR HISTÓRICO E STATUS (USUÁRIO ESPECÍFICO)
 // ============================================================================
-export const fetchUserHistory = async (nickname: string): Promise<UserHistoryItem[]> => {
+export const fetchUserHistory = async (nickname) => {
   try {
     // Worker espera: ?gid=...
     const url = `${BASE_SHEET_URL}?gid=${GID_HISTORY}&${getCacheBuster()}`;
@@ -140,7 +120,7 @@ export const fetchUserHistory = async (nickname: string): Promise<UserHistoryIte
     if (text.trim().startsWith('<')) return [];
 
     const rows = parseTSV(text);
-    const history: UserHistoryItem[] = [];
+    const history = [];
     const searchNick = nickname.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
     for (let i = 1; i < rows.length; i++) {
@@ -174,7 +154,7 @@ export const fetchUserHistory = async (nickname: string): Promise<UserHistoryIte
   }
 };
 
-export const submitMissionToSheet = async (data: MissionSubmission): Promise<{ success: boolean; message: string }> => {
+export const submitMissionToSheet = async (data) => {
   try {
     const formData = new URLSearchParams();
     formData.append('nickname', data.nickname);

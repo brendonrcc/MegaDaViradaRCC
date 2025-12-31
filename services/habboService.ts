@@ -1,19 +1,11 @@
 // Generates a random code like "RCC-1234"
-export const generateVerificationCode = (): string => {
+export const generateVerificationCode = () => {
   const randomNum = Math.floor(1000 + Math.random() * 9000); // 1000 to 9999
   return `RCC-${randomNum}`;
 };
 
-interface HabboApiResponse {
-  name: string;
-  motto: string;
-  uniqueId: string;
-  profileVisible?: boolean; 
-  error?: string;
-}
-
 // Limpeza agressiva de strings para comparação (remove acentos, espaços extras, case insensitive)
-const normalizeForComparison = (str: string): string => {
+const normalizeForComparison = (str) => {
   if (!str) return "";
   return str.toString()
     .normalize("NFD")
@@ -22,7 +14,7 @@ const normalizeForComparison = (str: string): string => {
     .toUpperCase();
 };
 
-export const verifyHabboMission = async (nickname: string, code: string): Promise<{ success: boolean; message: string }> => {
+export const verifyHabboMission = async (nickname, code) => {
   // 1. Bypass para testes/desenvolvimento
   if (nickname.toUpperCase() === "DEV") {
       return { success: true, message: "Modo Desenvolvedor: Acesso Permitido." };
@@ -36,8 +28,8 @@ export const verifyHabboMission = async (nickname: string, code: string): Promis
       {
           name: 'AllOrigins',
           // Adiciona timestamp para evitar cache do AllOrigins
-          getUrl: (url: string) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}&disableCache=true&_t=${Date.now()}`,
-          parse: async (res: Response) => {
+          getUrl: (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}&disableCache=true&_t=${Date.now()}`,
+          parse: async (res) => {
               const json = await res.json();
               if (!json.contents) throw new Error("Conteúdo vazio do proxy");
               // AllOrigins retorna o conteúdo como string dentro de 'contents', precisamos fazer parse novamente
@@ -47,14 +39,14 @@ export const verifyHabboMission = async (nickname: string, code: string): Promis
       {
           name: 'CorsProxy',
           // CorsProxy direto
-          getUrl: (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}&_bust=${Date.now()}`,
-          parse: async (res: Response) => await res.json()
+          getUrl: (url) => `https://corsproxy.io/?${encodeURIComponent(url)}&_bust=${Date.now()}`,
+          parse: async (res) => await res.json()
       },
       {
           name: 'ThingProxy',
           // Fallback final
-          getUrl: (url: string) => `https://thingproxy.freeboard.io/fetch/${url}?_=${Date.now()}`,
-          parse: async (res: Response) => await res.json()
+          getUrl: (url) => `https://thingproxy.freeboard.io/fetch/${url}?_=${Date.now()}`,
+          parse: async (res) => await res.json()
       }
   ];
 
@@ -84,7 +76,7 @@ export const verifyHabboMission = async (nickname: string, code: string): Promis
               throw new Error(`HTTP Error ${response.status}`);
           }
 
-          const data: HabboApiResponse = await proxy.parse(response);
+          const data = await proxy.parse(response);
 
           // Validações da API do Habbo
           if (data.error === 'not-found') {
@@ -113,7 +105,7 @@ export const verifyHabboMission = async (nickname: string, code: string): Promis
               };
           }
 
-      } catch (err: any) {
+      } catch (err) {
           console.warn(`[HabboService] Falha no proxy ${proxy.name}:`, err.message);
           
           // Se o erro foi especificamente "Usuário não encontrado" vindo do Habbo (via proxy), paramos.

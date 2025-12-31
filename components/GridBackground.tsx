@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 
-const GridBackground: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouseRef = useRef({ x: 0, y: 0 });
+const GridBackground = () => {
+  const canvasRef = React.useRef(null);
+  const mouseRef = React.useRef({ x: 0, y: 0 });
 
-  useEffect(() => {
+  React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -31,7 +31,7 @@ const GridBackground: React.FC = () => {
     
     const gridSize = 40;
 
-    let animationId: number;
+    let animationId;
 
     const animate = () => {
       ctx.clearRect(0, 0, width, height);
@@ -85,7 +85,7 @@ const GridBackground: React.FC = () => {
       animationId = requestAnimationFrame(animate);
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = (e) => {
         mouseRef.current = { x: e.clientX, y: e.clientY };
     };
     

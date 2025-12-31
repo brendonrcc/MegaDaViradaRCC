@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 
-const BackgroundEffects: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouseRef = useRef({ x: 0, y: 0 });
+const BackgroundEffects = () => {
+  const canvasRef = React.useRef(null);
+  const mouseRef = React.useRef({ x: 0, y: 0 });
 
-  useEffect(() => {
+  React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d', { alpha: false });
@@ -23,7 +23,7 @@ const BackgroundEffects: React.FC = () => {
 
     // Particle Configuration
     const PARTICLE_COUNT = 150;
-    const particles: Particle[] = [];
+    const particles = [];
 
     class Particle {
       x: number;
@@ -89,7 +89,7 @@ const BackgroundEffects: React.FC = () => {
     }
 
     // Animation Loop
-    let animationFrameId: number;
+    let animationFrameId;
     const animate = () => {
       if (!ctx || !canvas) return;
       
@@ -131,7 +131,7 @@ const BackgroundEffects: React.FC = () => {
     };
 
     // Event Listeners
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = (e) => {
         mouseRef.current = { x: e.clientX, y: e.clientY };
     };
 

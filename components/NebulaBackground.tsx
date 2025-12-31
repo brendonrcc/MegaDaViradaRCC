@@ -1,9 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 
-const NebulaBackground: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const NebulaBackground = () => {
+  const canvasRef = React.useRef(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');

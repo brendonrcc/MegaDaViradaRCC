@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
-const Countdown: React.FC = () => {
-  const [timeLeft, setTimeLeft] = useState({
+const Countdown = () => {
+  const [timeLeft, setTimeLeft] = React.useState({
     days: 0,
     hours: 0,
     minutes: 0,
     seconds: 0
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     const targetDate = new Date(`January 1, ${new Date().getFullYear() + 1} 00:00:00`).getTime();
 
     const interval = setInterval(() => {
